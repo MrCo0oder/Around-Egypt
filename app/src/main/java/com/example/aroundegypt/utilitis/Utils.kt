@@ -1,10 +1,8 @@
 package com.example.aroundegypt.utilitis
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import java.io.File
 
 object Utils {
     fun isInternetConnected(context: Context): Boolean {

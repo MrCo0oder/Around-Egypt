@@ -84,8 +84,7 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
-
-
+    implementation(libs.kotlinx.serialization.json)
 }
 kapt {
     correctErrorTypes = true

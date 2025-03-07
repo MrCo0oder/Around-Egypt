@@ -9,7 +9,6 @@ import androidx.compose.ui.unit.sp
 import com.example.aroundegypt.R
 
 
-// Define font families
 val GothamRounded = FontFamily(Font(R.font.gotham_rnd_bold, FontWeight.Bold))
 val Gotham = FontFamily(
     Font(R.font.gotham_bold, FontWeight.Bold),
@@ -21,7 +20,7 @@ val Inter = FontFamily(Font(R.font.inter))
 val AppTypography = Typography(
     titleLarge = TextStyle( // Style 1
         fontFamily = GothamRounded,
-        fontWeight = FontWeight.Bold, // 700
+        fontWeight = FontWeight.Bold,
         fontSize = 22.sp
     ),
     titleMedium = TextStyle( // Style 2
