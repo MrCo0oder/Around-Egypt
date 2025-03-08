@@ -10,6 +10,10 @@ private val LightColorScheme = lightColorScheme(
     primary = Accent,
     background = White,
     onBackground = Black,
+    surface = White,
+    onSurface = Black,
+    onSurfaceVariant = Gray,
+    onPrimary = Accent
 )
 
 @Composable

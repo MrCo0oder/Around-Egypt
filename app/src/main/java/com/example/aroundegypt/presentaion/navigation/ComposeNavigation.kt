@@ -1,8 +1,11 @@
 package com.example.aroundegypt.presentaion.navigation
 
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.SizeTransform
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.aroundegypt.presentaion.screens.details.DetailsScreen
@@ -19,7 +22,9 @@ fun ComposeNavigation() {
                 navController.navigate(Destinations.Details(it))
             }
         }
-        composable<Destinations.Details>() {
+        dialog<Destinations.Details>(
+
+        ) {
             val args = it.toRoute<Destinations.Details>()
             DetailsScreen(args.id) {
                 navController.popBackStack()
