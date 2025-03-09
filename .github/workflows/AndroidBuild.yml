@@ -34,14 +34,14 @@ jobs:
 
       - name: Prepare APK for Upload
         run: |
-          # Copy APK to root directory and rename
-          cp app/build/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk Around-Egypt-${{ matrix.build-type }}.apk
+          mkdir -p artifacts
+          cp app/build/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk artifacts/Around-Egypt-${{ matrix.build-type }}.apk
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Around-Egypt-${{ matrix.build-type }}.apk
-          path: Around-Egypt-${{ matrix.build-type }}.apk
+          path: artifacts/Around-Egypt-${{ matrix.build-type }}.apk
 
   release:
     needs: build
@@ -56,10 +56,8 @@ jobs:
         with:
           path: artifacts
 
-      - name: Flatten Artifact Directories
-        run: |
-          # Move all APKs from subdirectories to the root artifacts directory
-          find artifacts -name '*.apk' -exec mv {} artifacts \;
+      - name: List Downloaded Artifacts (Debugging Step)
+        run: ls -R artifacts
 
       - name: Create GitHub Release
         id: create_release
@@ -72,13 +70,13 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release APK (Release Build)
+      - name: Upload Release APK
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/*-release.apk
+          asset_path: artifacts/Around-Egypt-release.apk
           asset_name: Around-Egypt-release.apk
           asset_content_type: application/vnd.android.package-archive
 
@@ -88,6 +86,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/*-debug.apk
+          asset_path: artifacts/Around-Egypt-debug.apk
           asset_name: Around-Egypt-debug.apk
           asset_content_type: application/vnd.android.package-archive
