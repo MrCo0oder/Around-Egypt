@@ -18,7 +18,7 @@ class ExperienceEntity(
 
     var isLiked: Int = 0,
 
-    val likesNo: Int = 0,
+    var likesNo: Int = 0,
 
     val recommended: Int = 0,
 

@@ -43,6 +43,7 @@ android {
     buildFeatures {
         compose = true
     }
+    ndkVersion = "25.2.9519653"
 }
 
 dependencies {
@@ -96,8 +97,6 @@ dependencies {
     // Coroutine testing library
     testImplementation (libs.kotlinx.coroutines.test)
 
-    // Hilt testing dependencies (if needed)
-//    testImplementation (libs.androidx.hilt.lifecycle.viewmodel.testing)
     testImplementation (libs.hilt.android.testing)
     testImplementation(libs.androidx.core.testing)
 
