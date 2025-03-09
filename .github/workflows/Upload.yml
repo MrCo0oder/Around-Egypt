@@ -1,9 +1,5 @@
 name: Upload APK
-on:
-    workflow_run:
-      workflows: ["Android Build"]
-      types:
-        - completed
+
 jobs:
   release:
     needs: build  # This ensures the release runs only after the build job finishes
