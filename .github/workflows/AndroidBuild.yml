@@ -32,11 +32,16 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew test${{ matrix.build-type }}UnitTest --stacktrace
 
+      - name: Prepare APK for Upload
+        run: |
+          # Copy APK to root directory and rename
+          cp app/build/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk Around-Egypt-${{ matrix.build-type }}.apk
+
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Around-Egypt-${{ matrix.build-type }}.apk
-          path: app/build/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk
+          path: Around-Egypt-${{ matrix.build-type }}.apk
 
   release:
     needs: build
@@ -50,6 +55,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: Flatten Artifact Directories
+        run: |
+          # Move all APKs from subdirectories to the root artifacts directory
+          find artifacts -name '*.apk' -exec mv {} artifacts \;
 
       - name: Create GitHub Release
         id: create_release
