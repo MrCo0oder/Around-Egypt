@@ -1,0 +1,39 @@
+name: Android Build
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        build-type: ['debug', 'release']
+      fail-fast: false
+      max-parallel: 2
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.1
+
+      - name: Setup Java JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Grant execute permission to Gradle
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew assemble${{ matrix.build-type }} --stacktrace
+
+      - name: Run Unit Tests
+        run: ./gradlew test${{ matrix.build-type }}UnitTest --stacktrace
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Around-Egypt-App-${{ matrix.build-type }}.apk
+          path: app/build/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk
