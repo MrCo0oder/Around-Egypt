@@ -1,7 +1,5 @@
 package com.example.aroundegypt.presentaion.navigation
 
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.SizeTransform
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,10 +12,12 @@ import com.example.aroundegypt.presentaion.screens.home.HomeScreen
 @Composable
 fun ComposeNavigation() {
     val navController = rememberNavController()
+
     NavHost(
         navController = navController, startDestination = Destinations.Home
     ) {
         composable<Destinations.Home> {
+
             HomeScreen {
                 navController.navigate(Destinations.Details(it))
             }

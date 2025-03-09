@@ -66,13 +66,13 @@ fun DetailsScreen(
     id: String, detailsViewModel: DetailsViewModel = hiltViewModel(), goBack: () -> Unit
 ) {
     val state = rememberModalBottomSheetState(true)
+    val uiState = detailsViewModel.experienceDetailsState.collectAsStateWithLifecycle().value
+    var isLiked by rememberSaveable { mutableStateOf(uiState.data?.isLiked == true) }
     LaunchedEffect(Unit) {
         detailsViewModel.getDetails(id)
     }
-    val uiState = detailsViewModel.getExperienceDetails.collectAsStateWithLifecycle().value
+
     val experience: MutableState<Experience?> = remember { mutableStateOf(null) }
-
-
 
     ModalBottomSheet(
         sheetState = state,
@@ -93,8 +93,6 @@ fun DetailsScreen(
         when (uiState) {
             is Resources.Success -> {
                 experience.value = uiState.data
-                var isLiked by rememberSaveable { mutableStateOf(experience.value?.isLiked) }
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -189,30 +187,32 @@ fun DetailsScreen(
                                         )
                                     }
                                     val likeState =
-                                        detailsViewModel.likeExperience.collectAsStateWithLifecycle().value
+                                        detailsViewModel.likeExperienceState.collectAsStateWithLifecycle().value
+                                    when (likeState) {
+                                        is Resources.Success -> {
+                                            isLiked = true
+                                        }
 
+                                        else -> {
+                                        }
+
+                                    }
                                     IconButton(
                                         {
                                             detailsViewModel.likeExperience(id)
+                                            isLiked = true
                                         },
-                                        enabled = when (likeState) {
-                                            is Resources.Success -> {
-                                                isLiked = likeState.data!! > it.likesNo
-                                                false
-                                            }
-
-                                            else -> true
-                                        },
+                                        enabled = uiState.data?.isLiked == false && isLiked.not(),
                                     ) {
                                         Icon(
-                                            painter = painterResource(id = if (isLiked == true) R.drawable.ic_like else R.drawable.ic_like_outlined),
+                                            painter = painterResource(id = if (uiState.data?.isLiked == true || isLiked) R.drawable.ic_like else R.drawable.ic_like_outlined),
                                             contentDescription = "heart",
                                             tint = Accent,
                                             modifier = Modifier
                                         )
                                     }
                                     Text(
-                                        text = if (isLiked == true) it.likesNo.plus(1)
+                                        text = if (isLiked) it.likesNo.plus(1)
                                             .toString() else it.likesNo.toString(),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = Color.Black,

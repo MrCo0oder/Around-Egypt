@@ -1,82 +1,64 @@
-package com.example.aroundegypt.presentaion.screens.home;
+package com.example.aroundegypt.presentaion.screens.home
 
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.aroundegypt.data.di.MainDispatcher
 import com.example.aroundegypt.domain.model.Experience
 import com.example.aroundegypt.domain.repository.ExperienceRepository
 import com.example.aroundegypt.utilitis.Resources
-
-import javax.inject.Inject;
-
-import dagger.hilt.android.lifecycle.HiltViewModel;
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(private val repository: ExperienceRepository) :
-    ViewModel() {
+class HomeViewModel @Inject constructor(
+    private val repository: ExperienceRepository,
+    @MainDispatcher private val dispatcher: CoroutineDispatcher
+) : ViewModel() {
 
-    private val _recommendedList: MutableStateFlow<Resources<List<Experience>>> =
-        MutableStateFlow(Resources.Loading())
-    val recommendedList: StateFlow<Resources<List<Experience>>> = _recommendedList
+    private val _recommendedExperiences =
+        MutableStateFlow<Resources<List<Experience>>>(Resources.Loading())
+    val recommendedExperiencesState: StateFlow<Resources<List<Experience>>> =
+        _recommendedExperiences.asStateFlow()
 
-    private fun coroutineExceptionHandler() = CoroutineExceptionHandler { _, throwable ->
+    private val _mostRecentList = MutableStateFlow<Resources<List<Experience>>>(Resources.Loading())
+    val mostRecentExperiencesState: StateFlow<Resources<List<Experience>>> =
+        _mostRecentList.asStateFlow()
+
+    private val _filteredExperiences =
+        MutableStateFlow<Resources<List<Experience>>>(Resources.Loading())
+    val filteredExperiencesState: StateFlow<Resources<List<Experience>>> =
+        _filteredExperiences.asStateFlow()
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.printStackTrace()
     }
 
-    private var coroutineScope: CoroutineScope
-    private val viewModelJob = Job()
-
-    init {
-        coroutineScope = CoroutineScope(viewModelJob + Dispatchers.IO)
-    }
-
-
     fun getRecommendedList() {
-        coroutineScope.launch(coroutineExceptionHandler()) {
-            repository.getRecommendedList().collectLatest {
-                _recommendedList.value = it
-            }
+        viewModelScope.launch(exceptionHandler + dispatcher) {
+            repository.getRecommendedList()
+                .collectLatest { _recommendedExperiences.value = it }
         }
     }
 
-    private val _mostRecentList: MutableStateFlow<Resources<List<Experience>>> =
-        MutableStateFlow(Resources.Loading())
-    val mostRecentList: StateFlow<Resources<List<Experience>>> = _mostRecentList
     fun getMostRecentList() {
-        coroutineScope.launch(coroutineExceptionHandler()) {
-            repository.getMostRecentList().collectLatest {
-                _mostRecentList.value = it
-            }
+        viewModelScope.launch(exceptionHandler + dispatcher) {
+            repository.getMostRecentList()
+                .collectLatest { _mostRecentList.value = it }
         }
     }
 
-    private val _filterList: MutableStateFlow<Resources<List<Experience>>> =
-        MutableStateFlow(Resources.Loading())
-    val filterList: StateFlow<Resources<List<Experience>>> = _filterList
-    fun getFilteredList(query: String) {
-        coroutineScope.launch(coroutineExceptionHandler()) {
-            repository.getFilteredList(query).collectLatest {
-                _filterList.value = it
-            }
+    fun getFilteredList(filterQuery: String) {
+        viewModelScope.launch(exceptionHandler + dispatcher) {
+            repository.getFilteredList(filterQuery)
+                .collectLatest { _filteredExperiences.value = it }
         }
     }
 
     fun clearSearch() {
-        _filterList.value = Resources.Success(emptyList())
+        _filteredExperiences.value = Resources.Success(emptyList())
     }
-
-    override fun onCleared() {
-        super.onCleared()
-        viewModelJob.cancel()
-        coroutineScope.cancel()
-    }
-
-
 }

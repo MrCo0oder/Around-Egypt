@@ -29,11 +29,13 @@ import com.example.aroundegypt.presentaion.components.HomeLabel
 import com.example.aroundegypt.presentaion.components.ListingRow
 import com.example.aroundegypt.presentaion.components.LoadingPlaceholder
 import com.example.aroundegypt.presentaion.components.RetryView
+import com.example.aroundegypt.presentaion.screens.details.DetailsViewModel
 import com.example.aroundegypt.utilitis.Resources
 
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel(),
+    detailsViewModel: DetailsViewModel = hiltViewModel(),
     openExperienceDetails: (id: String) -> Unit
 ) {
     LaunchedEffect(Unit) {
@@ -42,9 +44,9 @@ fun HomeScreen(
             getMostRecentList()
         }
     }
-    val recommendedListState = viewModel.recommendedList.collectAsState().value
-    val mostRecentListState = viewModel.mostRecentList.collectAsState().value
-    val filterListState = viewModel.filterList.collectAsState().value
+    val recommendedListState = viewModel.recommendedExperiencesState.collectAsState().value
+    val mostRecentListState = viewModel.mostRecentExperiencesState.collectAsState().value
+    val filterListState = viewModel.filteredExperiencesState.collectAsState().value
     var selectedItem by remember { mutableStateOf(Experience()) }
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
@@ -83,7 +85,10 @@ fun HomeScreen(
                             items(recommendedListState.data!!.size) { index ->
                                 ListingRow(
                                     openExperienceDetails,
-                                    recommendedListState.data!![index]
+                                    recommendedListState.data!![index], onLike = {
+                                        detailsViewModel.likeExperience(recommendedListState.data!![index].id)
+                                        viewModel.getRecommendedList()
+                                    }
                                 )
                             }
                         }
@@ -111,7 +116,13 @@ fun HomeScreen(
                         Text("No data available!")
                     } else {
                         mostRecentListState.data!!.forEachIndexed { index, _ ->
-                            ListingRow(openExperienceDetails, mostRecentListState.data!![index])
+                            ListingRow(
+                                openExperienceDetails,
+                                mostRecentListState.data!![index],
+                                onLike = {
+                                    detailsViewModel.likeExperience(mostRecentListState.data!![index].id)
+                                    viewModel.getMostRecentList()
+                                })
                         }
                     }
                 }

@@ -55,10 +55,13 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.junit.ktx)
+    implementation(libs.androidx.ui.test.junit4.android)
 
 
 
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -76,7 +79,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
 
-    implementation("com.eygraber:compose-placeholder-material3:1.0.8")
+    implementation(libs.compose.placeholder.material3)
     implementation(libs.coil.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
@@ -85,6 +88,19 @@ dependencies {
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+
+
+    // MockK for mocking objects in unit tests
+    testImplementation (libs.mockk)
+
+    // Coroutine testing library
+    testImplementation (libs.kotlinx.coroutines.test)
+
+    // Hilt testing dependencies (if needed)
+//    testImplementation (libs.androidx.hilt.lifecycle.viewmodel.testing)
+    testImplementation (libs.hilt.android.testing)
+    testImplementation(libs.androidx.core.testing)
+
 }
 kapt {
     correctErrorTypes = true
