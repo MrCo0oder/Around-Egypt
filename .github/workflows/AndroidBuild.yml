@@ -78,7 +78,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/Around-Egypt-release.apk
+          asset_path: artifacts/*-release.apk
           asset_name: Around-Egypt-release.apk
           asset_content_type: application/vnd.android.package-archive
 
@@ -88,6 +88,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/Around-Egypt-debug.apk
+          asset_path: artifacts/*-debug.apk
           asset_name: Around-Egypt-debug.apk
           asset_content_type: application/vnd.android.package-archive
