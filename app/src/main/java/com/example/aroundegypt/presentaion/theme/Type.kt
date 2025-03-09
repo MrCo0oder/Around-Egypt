@@ -1,6 +1,7 @@
 package com.example.aroundegypt.presentaion.theme
 
 import androidx.compose.material3.Typography
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -52,5 +53,11 @@ val AppTypography = Typography(
         fontFamily = Inter,
         fontWeight = FontWeight.Normal, // 400
         fontSize = 17.sp
-    )
+    ),
+    labelMedium = TextStyle( // Style 8
+        fontFamily = Gotham,
+        fontWeight = FontWeight.Medium, // 400
+        fontSize = 16.sp,
+        color = Color(0xFF555555)
+    ),
 )

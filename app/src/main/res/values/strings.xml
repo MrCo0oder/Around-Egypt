@@ -7,4 +7,9 @@
     <string name="recommended">RECOMMENDED</string>
     <string name="most_recent">Most Recent</string>
     <string name="explore_now">EXPLORE NOW</string>
+    <string name="error">Error: %1$s</string>
+    <string name="something_went_wrong">SomeThing went wrong!</string>
+    <string name="views"> %1$s  views</string>
+    <string name="description">Description</string>
+    <string name="egypt">%1$s, Egypt.</string>
 </resources>

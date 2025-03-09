@@ -1,77 +1,50 @@
 package com.example.aroundegypt.presentaion.screens.home
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.aroundegypt.R
+import com.example.aroundegypt.domain.model.Experience
 import com.example.aroundegypt.presentaion.components.AppBar
 import com.example.aroundegypt.presentaion.components.HomeHeader
 import com.example.aroundegypt.presentaion.components.HomeLabel
 import com.example.aroundegypt.presentaion.components.ListingRow
-import com.example.aroundegypt.presentaion.theme.Accent
-import com.valentinilk.shimmer.shimmer
+import com.example.aroundegypt.presentaion.components.LoadingPlaceholder
+import com.example.aroundegypt.presentaion.components.RetryView
+import com.example.aroundegypt.utilitis.Resources
 
 @Composable
-fun HomeScreen(openExperienceDetails: (id: Int) -> Unit) {
-    val sampleItems = listOf(
-        "Apple",
-        "Banana",
-        "Cherry",
-        "Durian",
-        "Elderberry",
-        "Fig",
-        "Grape",
-        "Honeydew",
-        "Jackfruit",
-        "Kiwi"
-    )
-    var selectedItem by remember { mutableStateOf("") }
+fun HomeScreen(
+    viewModel: HomeViewModel = hiltViewModel(),
+    openExperienceDetails: (id: String) -> Unit
+) {
+    LaunchedEffect(Unit) {
+        viewModel.apply {
+            getRecommendedList()
+            getMostRecentList()
+        }
+    }
+    val recommendedListState = viewModel.recommendedList.collectAsState().value
+    val mostRecentListState = viewModel.mostRecentList.collectAsState().value
+    var selectedItem by remember { mutableStateOf(Experience()) }
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
     Column(
@@ -80,10 +53,10 @@ fun HomeScreen(openExperienceDetails: (id: Int) -> Unit) {
         modifier = Modifier.fillMaxSize()
     ) {
         AppBar(
-            items = sampleItems,
+            items = recommendedListState.data ?: emptyList(),
             onItemClick = { item ->
                 selectedItem = item
-                openExperienceDetails(item.hashCode())
+                openExperienceDetails(item.id)
             },
             onSearch = { query ->
                 println("Searching for: $query")
@@ -92,32 +65,68 @@ fun HomeScreen(openExperienceDetails: (id: Int) -> Unit) {
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
                 .nestedScroll(nestedScrollConnection)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HomeHeader()
             HomeLabel(stringResource(R.string.recommended_experiences))
-            LazyRow {
-                items(sampleItems.size) { index ->
-                    ListingRow(openExperienceDetails, index, sampleItems)
+            when (recommendedListState) {
+                is Resources.Success -> {
+                    if (recommendedListState.data.isNullOrEmpty()) {
+                        Text("No data available!")
+                    } else {
+                        LazyRow {
+                            items(recommendedListState.data.size) { index ->
+                                ListingRow(openExperienceDetails, recommendedListState.data[index])
+                            }
+                        }
+                    }
+                }
+
+                is Resources.Error -> {
+                    RetryView(
+                        recommendedListState.message
+                            ?: stringResource(R.string.something_went_wrong)
+                    ) {
+                        viewModel.getRecommendedList()
+                    }
+                }
+
+                is Resources.Loading -> {
+                    for (i in 0..4)
+                        LoadingPlaceholder()
                 }
             }
             HomeLabel(stringResource(R.string.most_recent))
-            sampleItems.forEachIndexed { index, _ ->
-                ListingRow(openExperienceDetails, index, sampleItems)
+            when (mostRecentListState) {
+                is Resources.Success -> {
+                    if (mostRecentListState.data.isNullOrEmpty()) {
+                        Text("No data available!")
+                    } else {
+                        mostRecentListState.data.forEachIndexed { index, _ ->
+                            ListingRow(openExperienceDetails, mostRecentListState.data[index])
+                        }
+                    }
+                }
+
+                is Resources.Error -> {
+                    RetryView(
+                        mostRecentListState.message ?: stringResource(R.string.something_went_wrong)
+                    ) {
+                        viewModel.getMostRecentList()
+                    }
+                }
+
+                is Resources.Loading -> {
+                    for (i in 0..4)
+                        LoadingPlaceholder()
+                }
             }
-
         }
-
-    }
-
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    HomeScreen() {
-
     }
 }
+
+
+
+

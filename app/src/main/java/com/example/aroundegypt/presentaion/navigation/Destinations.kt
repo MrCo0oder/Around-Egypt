@@ -8,6 +8,6 @@ sealed class Destinations {
     data object Home : Destinations()
 
     @Serializable
-    data class Details( val id: Int): Destinations()
+    data class Details( val id: String): Destinations()
 
 }

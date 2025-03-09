@@ -76,8 +76,7 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
 
-
-    implementation(libs.compose.shimmer)
+    implementation("com.eygraber:compose-placeholder-material3:1.0.8")
     implementation(libs.coil.compose)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
