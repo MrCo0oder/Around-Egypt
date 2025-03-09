@@ -92,14 +92,13 @@ dependencies {
 
 
     // MockK for mocking objects in unit tests
-    testImplementation (libs.mockk)
+    testImplementation(libs.mockk)
 
     // Coroutine testing library
-    testImplementation (libs.kotlinx.coroutines.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 
-    testImplementation (libs.hilt.android.testing)
+    testImplementation(libs.hilt.android.testing)
     testImplementation(libs.androidx.core.testing)
-
 }
 kapt {
     correctErrorTypes = true
