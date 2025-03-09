@@ -31,8 +31,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/Moca-app-release.apk
-          asset_name: Moca-app-release.apk
+          asset_path: artifacts/Around-Egypt-app-release.apk
+          asset_name: Around-Egypt-app-release.apk
           asset_content_type: application/vnd.android.package-archive
 
       - name: Upload Debug APK (Optional)
@@ -42,5 +42,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: artifacts/Moca-app-debug.apk
-          asset_name: Moca-app-debug.apk
+          asset_name: Around-Egypt-app-debug.apk
           asset_content_type: application/vnd.android.package-archive
