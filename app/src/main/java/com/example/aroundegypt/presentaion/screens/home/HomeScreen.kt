@@ -44,6 +44,7 @@ fun HomeScreen(
     }
     val recommendedListState = viewModel.recommendedList.collectAsState().value
     val mostRecentListState = viewModel.mostRecentList.collectAsState().value
+    val filterListState = viewModel.filterList.collectAsState().value
     var selectedItem by remember { mutableStateOf(Experience()) }
     val nestedScrollConnection = rememberNestedScrollInteropConnection()
 
@@ -53,14 +54,16 @@ fun HomeScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         AppBar(
-            items = recommendedListState.data ?: emptyList(),
+            items = filterListState.data ?: emptyList(),
             onItemClick = { item ->
                 selectedItem = item
                 openExperienceDetails(item.id)
             },
             onSearch = { query ->
-                println("Searching for: $query")
-            })
+                viewModel.getFilteredList(query)
+            }) {
+            viewModel.clearSearch()
+        }
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())

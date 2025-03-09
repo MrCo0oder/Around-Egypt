@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.Flow
 interface ExperienceRepository {
     fun getRecommendedList(
     ): Flow<Resources<List<Experience>>>
+
     fun getMostRecentList(
     ): Flow<Resources<List<Experience>>>
+
+    fun getFilteredList(query: String): Flow<Resources<List<Experience>>>
 }

@@ -6,6 +6,7 @@ import com.example.aroundegypt.utilitis.Constants.API_VERSION
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
     @GET("v{version}/experiences?filter[recommended]=true")
@@ -18,11 +19,11 @@ interface ApiService {
         @Path("version") version: Int = API_VERSION,
     ): HeaderResponse<List<ExperienceDTO?>?>
 
-    @GET("v{version}/experiences?filter[title]={search_text}")
+    @GET("v{version}/experiences")
     suspend fun searchExperiences(
-        @Path("search_text") query: String,
         @Path("version") version: Int = API_VERSION,
-    ): HeaderResponse<List<ExperienceDTO?>?>
+        @Query("filter[title]") query: String,
+        ): HeaderResponse<List<ExperienceDTO?>?>
 
     @GET("v{version}/experiences/{id}")
     suspend fun getExperienceDetails(

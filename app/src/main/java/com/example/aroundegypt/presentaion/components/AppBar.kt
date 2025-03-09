@@ -54,7 +54,8 @@ fun AppBar(
     onItemClick: (Experience) -> Unit = {},
     onMenuClicked: () -> Unit = {},
     onFilterClicked: () -> Unit = {},
-    onSearch: (String) -> Unit = {}
+    onSearch: (String) -> Unit = {},
+    clearSearch: () -> Unit = {}
 ) {
     val focusManager = LocalFocusManager.current
     var searchQuery by remember { mutableStateOf("") }
@@ -67,6 +68,7 @@ fun AppBar(
     val clearSearchAndDismiss = {
         searchQuery = ""
         focusManager.clearFocus()
+        clearSearch()
     }
     Column(
         modifier = modifier
@@ -133,7 +135,7 @@ fun AppBar(
                 keyboardActions = KeyboardActions(
                     onSearch = {
                         onSearch(searchQuery)
-                        focusManager.clearFocus()
+//                        focusManager.clearFocus()
                     }
                 ),
                 shape = RoundedCornerShape(16.dp),
@@ -168,11 +170,8 @@ fun AppBar(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
-                val filteredItems = items.filter {
-                    it.title.contains(searchQuery, ignoreCase = true)
-                }
 
-                items(filteredItems.size) { item ->
+                items(items.size) { item ->
                     ListingRow(
                         openExperienceDetails = {
                             searchQuery = (items[item].title)
@@ -186,7 +185,7 @@ fun AppBar(
 
                 }
 
-                if (filteredItems.isEmpty() && searchQuery.isNotEmpty()) {
+                if (items.isEmpty() && searchQuery.isNotEmpty()) {
                     item {
                         Box(
                             modifier = Modifier

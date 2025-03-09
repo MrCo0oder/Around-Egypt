@@ -57,6 +57,20 @@ class HomeViewModel @Inject constructor(private val repository: ExperienceReposi
         }
     }
 
+    private val _filterList: MutableStateFlow<Resources<List<Experience>>> =
+        MutableStateFlow(Resources.Loading())
+    val filterList: StateFlow<Resources<List<Experience>>> = _filterList
+    fun getFilteredList(query: String) {
+        coroutineScope.launch(coroutineExceptionHandler()) {
+            repository.getFilteredList(query).collectLatest {
+                _filterList.value = it
+            }
+        }
+    }
+
+    fun clearSearch() {
+        _filterList.value = Resources.Success(emptyList())
+    }
 
     override fun onCleared() {
         super.onCleared()
