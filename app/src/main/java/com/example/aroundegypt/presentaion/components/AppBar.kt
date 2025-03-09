@@ -52,6 +52,7 @@ fun AppBar(
     hint: String = stringResource(R.string.try_luxor),
     items: List<Experience> = emptyList(),
     onItemClick: (Experience) -> Unit = {},
+    onLike: (Experience) -> Unit = {},
     onMenuClicked: () -> Unit = {},
     onFilterClicked: () -> Unit = {},
     onSearch: (String) -> Unit = {},
@@ -178,6 +179,7 @@ fun AppBar(
                             onItemClick(items[item])
                             focusManager.clearFocus()
                         },
+                        onLike = { onLike(items[item]) },
                         experienceItems = items[item],
                         modifier = Modifier
                     )

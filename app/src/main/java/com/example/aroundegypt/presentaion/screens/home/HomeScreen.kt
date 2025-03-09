@@ -61,6 +61,11 @@ fun HomeScreen(
                 selectedItem = item
                 openExperienceDetails(item.id)
             },
+            onLike = { item ->
+                detailsViewModel.likeExperience(item.id)
+                viewModel.getRecommendedList()
+                viewModel.getMostRecentList()
+            },
             onSearch = { query ->
                 viewModel.getFilteredList(query)
             }) {

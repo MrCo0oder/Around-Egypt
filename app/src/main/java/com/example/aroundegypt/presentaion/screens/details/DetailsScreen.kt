@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -58,6 +59,7 @@ import com.example.aroundegypt.presentaion.components.RetryView
 import com.example.aroundegypt.presentaion.components.ViewsRow
 import com.example.aroundegypt.presentaion.theme.Accent
 import com.example.aroundegypt.utilitis.Resources
+import com.example.aroundegypt.utilitis.Utils
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,13 +121,17 @@ fun DetailsScreen(
                                         colors = listOf(Color.Transparent, Color.Black),
                                         start = Offset(x = 0f, y = 500f),
                                         end = Offset(x = 0f, y = 900f),
-                                        tileMode = androidx.compose.ui.graphics.TileMode.Decal
+                                        tileMode = TileMode.Decal
                                     )
                                 )
                         )
+                        val context = LocalContext.current
                         Button(
                             {
-
+                                Utils.openUrlWithChromeTab(
+                                    uiState.data?.tourHtml,
+                                    context
+                                )
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color.White, contentColor = Accent
