@@ -77,8 +77,11 @@ fun HomeScreen(
                         Text("No data available!")
                     } else {
                         LazyRow {
-                            items(recommendedListState.data.size) { index ->
-                                ListingRow(openExperienceDetails, recommendedListState.data[index])
+                            items(recommendedListState.data!!.size) { index ->
+                                ListingRow(
+                                    openExperienceDetails,
+                                    recommendedListState.data!![index]
+                                )
                             }
                         }
                     }
@@ -104,8 +107,8 @@ fun HomeScreen(
                     if (mostRecentListState.data.isNullOrEmpty()) {
                         Text("No data available!")
                     } else {
-                        mostRecentListState.data.forEachIndexed { index, _ ->
-                            ListingRow(openExperienceDetails, mostRecentListState.data[index])
+                        mostRecentListState.data!!.forEachIndexed { index, _ ->
+                            ListingRow(openExperienceDetails, mostRecentListState.data!![index])
                         }
                     }
                 }

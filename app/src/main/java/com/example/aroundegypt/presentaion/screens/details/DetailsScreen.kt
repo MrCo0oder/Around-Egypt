@@ -3,7 +3,6 @@ package com.example.aroundegypt.presentaion.screens.details
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,15 +32,16 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -58,9 +58,6 @@ import com.example.aroundegypt.presentaion.components.RetryView
 import com.example.aroundegypt.presentaion.components.ViewsRow
 import com.example.aroundegypt.presentaion.theme.Accent
 import com.example.aroundegypt.utilitis.Resources
-import com.eygraber.compose.placeholder.PlaceholderHighlight
-import com.eygraber.compose.placeholder.material3.placeholder
-import com.eygraber.compose.placeholder.material3.shimmer
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,7 +93,7 @@ fun DetailsScreen(
         when (uiState) {
             is Resources.Success -> {
                 experience.value = uiState.data
-                val isLiked = rememberSaveable { mutableStateOf(experience.value?.isLiked) }
+                var isLiked by rememberSaveable { mutableStateOf(experience.value?.isLiked) }
 
                 Column(
                     modifier = Modifier
@@ -191,21 +188,32 @@ fun DetailsScreen(
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
+                                    val likeState =
+                                        detailsViewModel.likeExperience.collectAsStateWithLifecycle().value
+
                                     IconButton(
                                         {
-                                            isLiked.value = isLiked.value?.not()
+                                            detailsViewModel.likeExperience(id)
                                         },
-                                        enabled = !isLiked.value!!,
+                                        enabled = when (likeState) {
+                                            is Resources.Success -> {
+                                                isLiked = likeState.data!! > it.likesNo
+                                                false
+                                            }
+
+                                            else -> true
+                                        },
                                     ) {
                                         Icon(
-                                            painter = painterResource(id = if (isLiked.value == true) R.drawable.ic_like else R.drawable.ic_like_outlined),
+                                            painter = painterResource(id = if (isLiked == true) R.drawable.ic_like else R.drawable.ic_like_outlined),
                                             contentDescription = "heart",
                                             tint = Accent,
                                             modifier = Modifier
                                         )
                                     }
                                     Text(
-                                        text = it.likesNo.toString(),
+                                        text = if (isLiked == true) it.likesNo.plus(1)
+                                            .toString() else it.likesNo.toString(),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = Color.Black,
                                         modifier = Modifier
