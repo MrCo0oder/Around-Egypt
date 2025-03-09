@@ -57,6 +57,7 @@ import com.example.aroundegypt.presentaion.components.CoilImage
 import com.example.aroundegypt.presentaion.components.LoadingPlaceholder
 import com.example.aroundegypt.presentaion.components.RetryView
 import com.example.aroundegypt.presentaion.components.ViewsRow
+import com.example.aroundegypt.presentaion.screens.home.HomeViewModel
 import com.example.aroundegypt.presentaion.theme.Accent
 import com.example.aroundegypt.utilitis.Resources
 import com.example.aroundegypt.utilitis.Utils
@@ -65,7 +66,7 @@ import com.example.aroundegypt.utilitis.Utils
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
-    id: String, detailsViewModel: DetailsViewModel = hiltViewModel(), goBack: () -> Unit
+    id: String, detailsViewModel: DetailsViewModel = hiltViewModel(), homeViewModel: HomeViewModel = hiltViewModel(), goBack: () -> Unit
 ) {
     val state = rememberModalBottomSheetState(true)
     val uiState = detailsViewModel.experienceDetailsState.collectAsStateWithLifecycle().value
@@ -80,7 +81,8 @@ fun DetailsScreen(
         sheetState = state,
         onDismissRequest = {
             goBack()
-
+            homeViewModel.getMostRecentList()
+            homeViewModel.getRecommendedList()
         },
         dragHandle = { },
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
@@ -193,7 +195,7 @@ fun DetailsScreen(
                                         )
                                     }
                                     val likeState =
-                                        detailsViewModel.likeExperienceState.collectAsStateWithLifecycle().value
+                                        homeViewModel.likeExperienceState.collectAsStateWithLifecycle().value
                                     when (likeState) {
                                         is Resources.Success -> {
                                             isLiked = true
@@ -205,7 +207,9 @@ fun DetailsScreen(
                                     }
                                     IconButton(
                                         {
-                                            detailsViewModel.likeExperience(id)
+                                            homeViewModel.likeExperience(id)
+                                            homeViewModel.getRecommendedList()
+                                            homeViewModel.getMostRecentList()
                                             isLiked = true
                                         },
                                         enabled = uiState.data?.isLiked == false && isLiked.not(),

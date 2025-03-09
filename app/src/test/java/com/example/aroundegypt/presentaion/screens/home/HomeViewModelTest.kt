@@ -7,6 +7,7 @@ import com.example.aroundegypt.data.repository.ExperienceRepositoryImpl
 import com.example.aroundegypt.data.toExperience
 import com.example.aroundegypt.domain.model.Experience
 import com.example.aroundegypt.domain.repository.ExperienceRepository
+import com.example.aroundegypt.domain.repository.LikeExperienceRepository
 import com.example.aroundegypt.utilitis.Resources
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -157,11 +158,16 @@ class HomeViewModelTest {
     ): HomeViewModel {
         return HomeViewModel(
             rep,
+            likeRepository = fakeLikeRepository,
             dispatcher
+
         )
     }
 }
-
+val fakeLikeRepository = object : LikeExperienceRepository {
+    override suspend fun invoke(id: String): Flow<Resources<Int>> =
+        flowOf(Resources.Success(1))
+}
 val fakeRepository = object : ExperienceRepository {
     override fun getRecommendedList(): Flow<Resources<List<Experience>>> =
         flowOf(Resources.Success(DummyData.getDummyExperiences().map { it.toExperience() }))

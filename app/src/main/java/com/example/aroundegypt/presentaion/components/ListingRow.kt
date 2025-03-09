@@ -73,25 +73,26 @@ fun ListingRow(
                             )
                         )
                 )
-            Row(
-                modifier = modifier
-                    .align(Alignment.TopStart)
-                    .padding(10.dp)
-                    .background(Color.Black.copy(0.5f), CircleShape)
-                    .padding(5.dp),
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_star),
-                    contentDescription = "star",
-                    tint = Accent
-                )
-                Text(
-                    text = stringResource(R.string.recommended),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 10.sp),
-                    color = Color.White,
-                )
-            }
+            if (experienceItems.recommended)
+                Row(
+                    modifier = modifier
+                        .align(Alignment.TopStart)
+                        .padding(10.dp)
+                        .background(Color.Black.copy(0.5f), CircleShape)
+                        .padding(5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_star),
+                        contentDescription = "star",
+                        tint = Accent
+                    )
+                    Text(
+                        text = stringResource(R.string.recommended),
+                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 10.sp),
+                        color = Color.White,
+                    )
+                }
             Icon(
                 Icons.Outlined.Info,
                 contentDescription = "information",

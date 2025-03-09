@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.aroundegypt.data.di.MainDispatcher
 import com.example.aroundegypt.domain.model.Experience
 import com.example.aroundegypt.domain.repository.ExperienceRepository
+import com.example.aroundegypt.domain.repository.LikeExperienceRepository
 import com.example.aroundegypt.utilitis.Resources
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: ExperienceRepository,
+    private val likeRepository: LikeExperienceRepository,
     @MainDispatcher private val dispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
@@ -55,6 +57,28 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(exceptionHandler + dispatcher) {
             repository.getFilteredList(filterQuery)
                 .collectLatest { _filteredExperiences.value = it }
+        }
+    }
+
+    private val _likeExperienceState: MutableStateFlow<Resources<Int>> =
+        MutableStateFlow(Resources.Loading())
+    val likeExperienceState: StateFlow<Resources<Int>> get() = _likeExperienceState
+
+    fun likeExperience(experienceId: String) {
+        viewModelScope.launch(exceptionHandler + dispatcher) {
+            likeRepository(experienceId).collectLatest {
+                when (it) {
+                    is Resources.Success -> {
+                        getRecommendedList()
+                        getMostRecentList()
+                    }
+
+                    is Resources.Error -> {
+                    }
+
+                    else -> Unit
+                }
+            }
         }
     }
 

@@ -18,7 +18,7 @@ fun ComposeNavigation() {
     ) {
         composable<Destinations.Home> {
 
-            HomeScreen {
+            HomeScreen (navController = navController){
                 navController.navigate(Destinations.Details(it))
             }
         }
