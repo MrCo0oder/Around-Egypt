@@ -1,11 +1,14 @@
 package com.example.aroundegypt.data.di
 
+import android.content.Context
+import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.example.aroundegypt.data.remote.api.ApiService
 import com.example.aroundegypt.utilitis.Constants.BASE_URL
 import com.example.aroundegypt.utilitis.Constants.TIMEOUT_SECONDS
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -30,12 +33,24 @@ class ApiModule @Inject constructor() {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(httpLoggingInterceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideChuckedInterceptor(@ApplicationContext context: Context): ChuckerInterceptor {
+        return ChuckerInterceptor(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideOkHttpClient(
+        httpLoggingInterceptor: HttpLoggingInterceptor,
+        chuckerInterceptor: ChuckerInterceptor
+    ): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .writeTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
-            .addInterceptor(httpLoggingInterceptor)
+            .apply {
+                addInterceptor(httpLoggingInterceptor)
+                addInterceptor(chuckerInterceptor)
+            }
             .build()
     }
 
@@ -54,4 +69,5 @@ class ApiModule @Inject constructor() {
     fun provideApiService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
     }
+
 }

@@ -48,7 +48,7 @@ fun ListingRow(
 ) {
     val screenWidth = LocalConfiguration.current.smallestScreenWidthDp.dp
     val itemWidth = screenWidth * 0.95f
-    val isLiked = rememberSaveable { mutableStateOf(experienceItems.isLiked) }
+    val isLiked = rememberSaveable { mutableStateOf(false) }
     ListItem({
         Box(
             modifier = Modifier

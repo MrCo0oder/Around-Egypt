@@ -19,54 +19,35 @@ class LikeExperienceRepositoryImpl @Inject constructor(
 
     override suspend fun invoke(id: String): Flow<Resources<Int>> {
 
-            return flow {
-                emit(Resources.Loading())
-                 try {
-                    val response = apiService.likeExperience(id)
-                    if (response.meta?.code == 200) {
-                        val updatedExperience = experienceDao.getExperienceById(id)
-                        updatedExperience?.let {
-                            experienceDao.updateLikeStatus(it.id, 1)
-                            experienceDao.updateLikesNo(id, response.data!!)
-                        }
-                        emit(Resources.Success(data = response.data))
-                    } else {
-                        emit(Resources.Error(response.meta?.errors?.joinToString("\n") ?: ""))
+        return flow {
+            emit(Resources.Loading())
+            try {
+                if (experienceDao.getExperienceById(id)?.isLiked == 1) {
+                    emit(
+                        Resources.Success(
+                            data = experienceDao.getExperienceById(id)?.likesNo
+                        )
+                    )
+                    return@flow
+                }
+                val response = apiService.likeExperience(id)
+                if (response.meta?.code == 200) {
+                    val updatedExperience = experienceDao.getExperienceById(id)
+                    updatedExperience?.let {
+                        experienceDao.updateLikeStatus(it.id, 1)
+                        experienceDao.updateLikesNo(id, response.data!!)
                     }
-                } catch (e: IOException) {
-                     e.printStackTrace()
-                     emit(Resources.Error("Could not load data"))
-                 } catch (e: HttpException) {
-                     e.printStackTrace()
-                     emit(Resources.Error("Could not load data"))
-                 }
-//                emit(Resources.Loading())
-//
-//                try {
-//                    // Check Room for the like status
-//                    val cachedLikeStatus = experienceDao.getExperienceById(id)
-//
-//                        // If not found in the cache, call the API to like the experience
-//                        val apiResponse = apiService.likeExperience(id)
-//
-//                        if (apiResponse.meta?.code == 200) {
-//
-//                            experienceDao.updateLikeStatus(id, 1)
-//
-//                            experienceDao.updateLikesNo(id,  apiResponse.data!!)
-//
-//                            emit(Resources.Success(data = apiResponse.data))
-//                        } else {
-//                            emit(Resources.Error(apiResponse.meta?.errors?.joinToString("\n") ?: ""))
-//
-//                    }
-//                } catch (e: IOException) {
-//                    e.printStackTrace()
-//                    emit(Resources.Error("Could not load data"))
-//                } catch (e: HttpException) {
-//                    e.printStackTrace()
-//                    emit(Resources.Error("Could not load data"))
-//                }
+                    emit(Resources.Success(data = response.data))
+                } else {
+                    emit(Resources.Error(response.meta?.errors?.joinToString("\n") ?: ""))
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+                emit(Resources.Error("Could not load data"))
+            } catch (e: HttpException) {
+                e.printStackTrace()
+                emit(Resources.Error("Could not load data"))
             }
         }
+    }
 }

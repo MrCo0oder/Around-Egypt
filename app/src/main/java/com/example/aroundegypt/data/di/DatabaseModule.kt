@@ -20,13 +20,15 @@ class DatabaseModule @Inject constructor() {
     @Provides
     @Singleton
     fun provideRoom(@ApplicationContext applicationContext: Context): AppDatabase {
-        return Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java,
-            AROUND_EGYPT_DATABASE
-        ).fallbackToDestructiveMigration()
-            .allowMainThreadQueries()
-            .build()
+        return synchronized(this) {
+            Room.databaseBuilder(
+                applicationContext,
+                AppDatabase::class.java,
+                AROUND_EGYPT_DATABASE
+            ).fallbackToDestructiveMigration()
+                .allowMainThreadQueries()
+                .build()
+        }
     }
 
     @Provides

@@ -39,6 +39,18 @@ class HomeViewModel @Inject constructor(
         throwable.printStackTrace()
     }
 
+    init {
+        viewModelScope.launch(exceptionHandler + dispatcher) {
+            repository.getRecommendedList()
+                .collectLatest { _recommendedExperiences.value = it }
+
+        }
+        viewModelScope.launch(exceptionHandler + dispatcher) {
+            repository.getMostRecentList()
+                .collectLatest { _mostRecentList.value = it }
+        }
+    }
+
     fun getRecommendedList() {
         viewModelScope.launch(exceptionHandler + dispatcher) {
             repository.getRecommendedList()
@@ -66,11 +78,10 @@ class HomeViewModel @Inject constructor(
 
     fun likeExperience(experienceId: String) {
         viewModelScope.launch(exceptionHandler + dispatcher) {
-            likeRepository(experienceId).collectLatest {
+            likeRepository(experienceId,).collectLatest {
                 when (it) {
                     is Resources.Success -> {
-                        getRecommendedList()
-                        getMostRecentList()
+                        updateItem(experienceId)
                     }
 
                     is Resources.Error -> {
@@ -81,6 +92,29 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    private fun updateItem(experienceId: String) {
+        val recommendedList = _recommendedExperiences.value.data?.toMutableList().apply {
+            this?.find { it.id == experienceId }?.copy(
+                isLiked = true,
+                likesNo = _recommendedExperiences.value.data?.find { it.id == experienceId }?.likesNo!!.plus(
+                    1
+                )
+            )?.let { this[this.indexOf(this.find { i -> i.id == experienceId })] = it }
+        }
+
+        _recommendedExperiences.value = Resources.Success(recommendedList!!)
+        val mostRecentList = _mostRecentList.value.data?.toMutableList().apply {
+            this?.find { it.id == experienceId }?.copy(
+                isLiked = true,
+                likesNo = _mostRecentList.value.data?.find { it.id == experienceId }?.likesNo!!.plus(
+                    1
+                )
+            )?.let { this[this.indexOf(this.find { i -> i.id == experienceId })] = it }
+        }
+        _mostRecentList.value = Resources.Success(mostRecentList!!)
+    }
+
 
     fun clearSearch() {
         _filteredExperiences.value = Resources.Success(emptyList())

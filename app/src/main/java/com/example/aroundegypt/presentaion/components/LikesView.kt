@@ -6,6 +6,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -20,6 +23,7 @@ fun LikesView(
     isLiked: MutableState<Boolean>,
     onLike: () -> Unit
 ) {
+    val likeState = remember{ mutableStateOf(experienceItems.isLiked) }
     Text(
         text = experienceItems.likesNo.toString(),
         style = MaterialTheme.typography.bodyMedium,
@@ -28,12 +32,13 @@ fun LikesView(
     IconButton(
         {
             isLiked.value = true
+            likeState.value = true
             onLike()
         },
-        enabled = isLiked.value.not(),
+        enabled = experienceItems.isLiked.not() || likeState.value.not(),
     ) {
         Icon(
-            painter = painterResource(id = if (isLiked.value) R.drawable.ic_like else R.drawable.ic_like_outlined),
+            painter = painterResource(id = if (experienceItems.isLiked) R.drawable.ic_like else R.drawable.ic_like_outlined),
             contentDescription = "heart",
             tint = Accent, modifier = modifier
         )

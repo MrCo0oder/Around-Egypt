@@ -66,7 +66,10 @@ import com.example.aroundegypt.utilitis.Utils
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailsScreen(
-    id: String, detailsViewModel: DetailsViewModel = hiltViewModel(), homeViewModel: HomeViewModel = hiltViewModel(), goBack: () -> Unit
+    id: String,
+    detailsViewModel: DetailsViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel(),
+    goBack: () -> Unit
 ) {
     val state = rememberModalBottomSheetState(true)
     val uiState = detailsViewModel.experienceDetailsState.collectAsStateWithLifecycle().value
@@ -81,8 +84,6 @@ fun DetailsScreen(
         sheetState = state,
         onDismissRequest = {
             goBack()
-            homeViewModel.getMostRecentList()
-            homeViewModel.getRecommendedList()
         },
         dragHandle = { },
         shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
@@ -208,8 +209,6 @@ fun DetailsScreen(
                                     IconButton(
                                         {
                                             homeViewModel.likeExperience(id)
-                                            homeViewModel.getRecommendedList()
-                                            homeViewModel.getMostRecentList()
                                             isLiked = true
                                         },
                                         enabled = uiState.data?.isLiked == false && isLiked.not(),

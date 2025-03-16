@@ -9,7 +9,7 @@ import com.example.aroundegypt.data.local.entities.ExperienceEntity
 @Dao
 interface ExperienceDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertAll(experiences: List<ExperienceEntity>)
 
     @Query("SELECT * FROM experience_table")

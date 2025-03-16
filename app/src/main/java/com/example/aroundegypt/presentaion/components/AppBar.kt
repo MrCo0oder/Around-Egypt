@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -44,13 +45,14 @@ import com.example.aroundegypt.R
 import com.example.aroundegypt.domain.model.Experience
 import com.example.aroundegypt.presentaion.theme.Gray
 import com.example.aroundegypt.presentaion.theme.Gray12
+import com.example.aroundegypt.utilitis.Resources
 
 
 @Composable
 fun AppBar(
     modifier: Modifier = Modifier,
     hint: String = stringResource(R.string.try_luxor),
-    items: List<Experience> = emptyList(),
+    items: Resources<List<Experience>>,
     onItemClick: (Experience) -> Unit = {},
     onLike: (Experience) -> Unit = {},
     onMenuClicked: () -> Unit = {},
@@ -100,6 +102,7 @@ fun AppBar(
                 textStyle = MaterialTheme.typography.labelLarge.copy(Color.Black),
                 onValueChange = { newValue ->
                     searchQuery = newValue
+                    onSearch(newValue)
                 },
                 modifier = Modifier
                     .onFocusChanged {
@@ -167,39 +170,71 @@ fun AppBar(
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-
-                items(items.size) { item ->
-                    ListingRow(
-                        openExperienceDetails = {
-                            searchQuery = (items[item].title)
-                            onItemClick(items[item])
-                            focusManager.clearFocus()
-                        },
-                        onLike = { onLike(items[item]) },
-                        experienceItems = items[item],
+            when (items) {
+                is Resources.Loading -> {
+                    Box(
                         modifier = Modifier
-                    )
-
-
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
                 }
 
-                if (items.isEmpty() && searchQuery.isNotEmpty()) {
-                    item {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("No results found", style = MaterialTheme.typography.headlineSmall)
+                is Resources.Success -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+
+                        items.data?.let {
+                            items(it.size) { item ->
+                                ListingRow(
+                                    openExperienceDetails = {
+                                        searchQuery = (items.data!![item].title.toString())
+                                        onItemClick(items.data!![item])
+                                        focusManager.clearFocus()
+                                    },
+                                    onLike = { onLike(items.data!![item]) },
+                                    experienceItems = items.data!![item],
+                                    modifier = Modifier
+                                )
+
+
+                            }
+                        }
+
+                        if (items.data?.isEmpty() == true && searchQuery.isNotEmpty()) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(16.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        "No results found",
+                                        style = MaterialTheme.typography.headlineSmall
+                                    )
+                                }
+                            }
                         }
                     }
                 }
+
+                is Resources.Error -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text("Something went wrong", style = MaterialTheme.typography.headlineSmall)
+                    }
+                }
             }
+
         }
     }
 
