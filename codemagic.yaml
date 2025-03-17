@@ -37,7 +37,7 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.com
+          - ae38988@gmail.com
       github:
         tag: v1.0.$BUILD_NUMBER
         release_name: Release v1.0.$BUILD_NUMBER
