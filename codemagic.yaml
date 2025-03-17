@@ -6,6 +6,7 @@ workflows:
     environment:
       vars:
         JAVA_VERSION: "17"
+        GH_TOKEN: "$GH_TOKEN"
       flutter: stable
       xcode: latest
     triggering:
