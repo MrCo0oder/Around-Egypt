@@ -1,91 +1,91 @@
-name: Android Build and Release
-
-on:
-  push:
-    branches: [master]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        build-type: ['debug', 'release']
-      fail-fast: false
-      max-parallel: 2
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.1.1
-
-      - name: Setup Java JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Grant execute permission to Gradle
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew assemble${{ matrix.build-type }} --stacktrace
-
-      - name: Run Unit Tests
-        run: ./gradlew test${{ matrix.build-type }}UnitTest --stacktrace
-
-      - name: Prepare APK for Upload
-        run: |
-          mkdir -p artifacts
-          cp app/build/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk artifacts/Around-Egypt-${{ matrix.build-type }}.apk
-
-      - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Around-Egypt-${{ matrix.build-type }}.apk
-          path: artifacts/Around-Egypt-${{ matrix.build-type }}.apk
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4.1.1
-
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: List Downloaded Artifacts (Debugging Step)
-        run: ls -R artifacts
-
-      - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          release_name: Release v1.0.${{ github.run_number }}
-          draft: false
-          prerelease: false
-
-      - name: Upload Release APK
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/Around-Egypt-release.apk
-          asset_name: Around-Egypt-release.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload Debug APK (Optional)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: artifacts/Around-Egypt-debug.apk
-          asset_name: Around-Egypt-debug.apk
-          asset_content_type: application/vnd.android.package-archive
+#name: Android Build and Release
+#
+#on:
+#  push:
+#    branches: [master]
+#
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#    strategy:
+#      matrix:
+#        build-type: ['debug', 'release']
+#      fail-fast: false
+#      max-parallel: 2
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4.1.1
+#
+#      - name: Setup Java JDK
+#        uses: actions/setup-java@v3
+#        with:
+#          java-version: '17'
+#          distribution: 'temurin'
+#
+#      - name: Grant execute permission to Gradle
+#        run: chmod +x gradlew
+#
+#      - name: Build with Gradle
+#        run: ./gradlew assemble${{ matrix.build-type }} --stacktrace
+#
+#      - name: Run Unit Tests
+#        run: ./gradlew test${{ matrix.build-type }}UnitTest --stacktrace
+#
+#      - name: Prepare APK for Upload
+#        run: |
+#          mkdir -p artifacts
+#          cp app/build/outputs/apk/${{ matrix.build-type }}/app-${{ matrix.build-type }}.apk artifacts/Around-Egypt-${{ matrix.build-type }}.apk
+#
+#      - name: Upload APK Artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: Around-Egypt-${{ matrix.build-type }}.apk
+#          path: artifacts/Around-Egypt-${{ matrix.build-type }}.apk
+#
+#  release:
+#    needs: build
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4.1.1
+#
+#      - name: Download Build Artifacts
+#        uses: actions/download-artifact@v4
+#        with:
+#          path: artifacts
+#
+#      - name: List Downloaded Artifacts (Debugging Step)
+#        run: ls -R artifacts
+#
+#      - name: Create GitHub Release
+#        id: create_release
+#        uses: actions/create-release@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          tag_name: v1.0.${{ github.run_number }}
+#          release_name: Release v1.0.${{ github.run_number }}
+#          draft: false
+#          prerelease: false
+#
+#      - name: Upload Release APK
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: artifacts/Around-Egypt-release.apk
+#          asset_name: Around-Egypt-release.apk
+#          asset_content_type: application/vnd.android.package-archive
+#
+#      - name: Upload Debug APK (Optional)
+#        uses: actions/upload-release-asset@v1
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        with:
+#          upload_url: ${{ steps.create_release.outputs.upload_url }}
+#          asset_path: artifacts/Around-Egypt-debug.apk
+#          asset_name: Around-Egypt-debug.apk
+#          asset_content_type: application/vnd.android.package-archive
