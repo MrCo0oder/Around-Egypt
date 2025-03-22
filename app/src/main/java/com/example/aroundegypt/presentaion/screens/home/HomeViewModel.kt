@@ -13,110 +13,122 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repository: ExperienceRepository,
-    private val likeRepository: LikeExperienceRepository,
-    @MainDispatcher private val dispatcher: CoroutineDispatcher
+    private val experienceRepository: ExperienceRepository,
+    private val likeExperienceRepository: LikeExperienceRepository,
+    @MainDispatcher private val mainDispatcher: CoroutineDispatcher
 ) : ViewModel() {
 
+    //region StateFlows
     private val _recommendedExperiences =
         MutableStateFlow<Resources<List<Experience>>>(Resources.Loading())
     val recommendedExperiencesState: StateFlow<Resources<List<Experience>>> =
-        _recommendedExperiences.asStateFlow()
+        _recommendedExperiences.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = Resources.Loading()
+        )
 
-    private val _mostRecentList = MutableStateFlow<Resources<List<Experience>>>(Resources.Loading())
+    private val _mostRecentExperiences = MutableStateFlow<Resources<List<Experience>>>(Resources.Loading())
     val mostRecentExperiencesState: StateFlow<Resources<List<Experience>>> =
-        _mostRecentList.asStateFlow()
+        _mostRecentExperiences.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = Resources.Loading()
+        )
 
     private val _filteredExperiences =
         MutableStateFlow<Resources<List<Experience>>>(Resources.Loading())
     val filteredExperiencesState: StateFlow<Resources<List<Experience>>> =
-        _filteredExperiences.asStateFlow()
+        _filteredExperiences.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = Resources.Loading()
+        )
+
+    private val _likeExperienceState: MutableStateFlow<Resources<Int>> =
+        MutableStateFlow(Resources.Loading())
+    val likeExperienceState: StateFlow<Resources<Int>> = _likeExperienceState.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = Resources.Loading()
+    )
+    //endregion
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         throwable.printStackTrace()
     }
 
     init {
-        viewModelScope.launch(exceptionHandler + dispatcher) {
-            repository.getRecommendedList()
-                .collectLatest { _recommendedExperiences.value = it }
+        refreshData()
+    }
 
-        }
-        viewModelScope.launch(exceptionHandler + dispatcher) {
-            repository.getMostRecentList()
-                .collectLatest { _mostRecentList.value = it }
-        }
+    private fun refreshData() {
+        getRecommendedList()
+        getMostRecentList()
     }
 
     fun getRecommendedList() {
-        viewModelScope.launch(exceptionHandler + dispatcher) {
-            repository.getRecommendedList()
-                .collectLatest { _recommendedExperiences.value = it }
-        }
+        fetchData(_recommendedExperiences) { experienceRepository.getRecommendedList() }
     }
 
     fun getMostRecentList() {
-        viewModelScope.launch(exceptionHandler + dispatcher) {
-            repository.getMostRecentList()
-                .collectLatest { _mostRecentList.value = it }
-        }
+        fetchData(_mostRecentExperiences) { experienceRepository.getMostRecentList() }
     }
 
     fun getFilteredList(filterQuery: String) {
-        viewModelScope.launch(exceptionHandler + dispatcher) {
-            repository.getFilteredList(filterQuery)
-                .collectLatest { _filteredExperiences.value = it }
-        }
+        fetchData(_filteredExperiences) { experienceRepository.getFilteredList(filterQuery) }
     }
 
-    private val _likeExperienceState: MutableStateFlow<Resources<Int>> =
-        MutableStateFlow(Resources.Loading())
-    val likeExperienceState: StateFlow<Resources<Int>> get() = _likeExperienceState
-
     fun likeExperience(experienceId: String) {
-        viewModelScope.launch(exceptionHandler + dispatcher) {
-            likeRepository(experienceId,).collectLatest {
-                when (it) {
-                    is Resources.Success -> {
-                        updateItem(experienceId)
-                    }
-
-                    is Resources.Error -> {
-                    }
-
-                    else -> Unit
+        viewModelScope.launch(exceptionHandler + mainDispatcher) {
+            likeExperienceRepository(experienceId).collectLatest { result ->
+                _likeExperienceState.value = result
+                if (result is Resources.Success) {
+                    updateItem(experienceId)
                 }
             }
         }
     }
 
-    private fun updateItem(experienceId: String) {
-        val recommendedList = _recommendedExperiences.value.data?.toMutableList().apply {
-            this?.find { it.id == experienceId }?.copy(
-                isLiked = true,
-                likesNo = _recommendedExperiences.value.data?.find { it.id == experienceId }?.likesNo!!.plus(
-                    1
-                )
-            )?.let { this[this.indexOf(this.find { i -> i.id == experienceId })] = it }
-        }
-
-        _recommendedExperiences.value = Resources.Success(recommendedList!!)
-        val mostRecentList = _mostRecentList.value.data?.toMutableList().apply {
-            this?.find { it.id == experienceId }?.copy(
-                isLiked = true,
-                likesNo = _mostRecentList.value.data?.find { it.id == experienceId }?.likesNo!!.plus(
-                    1
-                )
-            )?.let { this[this.indexOf(this.find { i -> i.id == experienceId })] = it }
-        }
-        _mostRecentList.value = Resources.Success(mostRecentList!!)
-    }
-
-
     fun clearSearch() {
         _filteredExperiences.value = Resources.Success(emptyList())
     }
+
+    //region Private Functions
+    private fun fetchData(
+        stateFlow: MutableStateFlow<Resources<List<Experience>>>,
+        fetch: suspend () -> Flow<Resources<List<Experience>>>
+    ) {
+        viewModelScope.launch(exceptionHandler + mainDispatcher) {
+            fetch().collectLatest { stateFlow.value = it }
+        }
+    }
+
+    private fun updateItem(experienceId: String) {
+        updateExperienceList(_recommendedExperiences, experienceId)
+        updateExperienceList(_mostRecentExperiences, experienceId)
+    }
+
+    private fun updateExperienceList(
+        stateFlow: MutableStateFlow<Resources<List<Experience>>>,
+        experienceId: String
+    ) {
+        stateFlow.update { currentResource ->
+            if (currentResource is Resources.Success) {
+                val updatedList = currentResource.data?.map { experience ->
+                    if (experience.id == experienceId) {
+                        experience.copy(isLiked = true, likesNo = experience.likesNo + 1)
+                    } else {
+                        experience
+                    }
+                }
+                Resources.Success(updatedList)
+            } else {
+                currentResource
+            }
+        }
+    }
+    //endregion
 }
